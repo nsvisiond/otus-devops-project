@@ -1,0 +1,53 @@
+stages:
+  - build
+  - test
+  - production
+
+variables:
+  MONGO: mongodb
+  MONGO_PORT: 27017
+  DOCKER_DRIVER: overlay2
+
+build_ui:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  script:
+    - echo 'Building'
+    - docker build -t $DOCKER_REGISTRY_USER/project_ui:latest .
+    - docker login -u $DOCKER_REGISTRY_USER -p $DOCKER_REGISTRY_PASSWORD
+    - docker push $DOCKER_REGISTRY_USER/project_ui:latest && docker image rm $DOCKER_REGISTRY_USER/project_ui:latest
+  tags:
+   - docker
+
+test_ui:
+  stage: test
+  image: docker:latest
+  services:
+    - docker:dind
+  variables:
+    DOCKER_DRIVER: overlay2
+    DOCKER_TLS_CERTDIR: ""
+  script:
+    - echo 'Test ui app'
+    - docker run $DOCKER_REGISTRY_USER/project_ui:latest python -m unittest discover -s tests/
+  tags:
+   - docker
+
+production_ui:
+  stage: production
+  when: manual
+  script:
+    - cd /swarm/
+    - docker stack deploy --compose-file=<(docker-compose -f docker-compose.yml config 2>/dev/null) PROD
+  only:
+    - master
+  environment:
+    name: production
+    url: https://app.otus-project.nsvision.ru
+  tags:
+    - app-shell

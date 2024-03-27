@@ -1,0 +1,5 @@
+---
+- hosts: docker_runner
+  become: true
+  roles:
+    - role: docker

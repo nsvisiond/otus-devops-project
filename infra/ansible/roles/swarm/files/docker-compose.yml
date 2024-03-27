@@ -1,0 +1,71 @@
+version: '3.3'
+services:
+  mongo:
+    image: mongo:3.2
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+    volumes:
+      - /swarm/volumes/mongo_db:/data/db
+    networks:
+      - network
+
+  ui:
+    image: ${USER_NAME}/project_ui:${UI_TAG}
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        delay: 5s
+        parallelism: 1
+        failure_action: rollback
+      placement:
+        constraints:
+          - node.role == worker
+    ports:
+      - ${HOST_PORT}:${CONT_PORT}/tcp
+    networks:
+      - network
+
+  crawler:
+    image: ${USER_NAME}/project_crawler:${CRAWLER_TAG}
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        delay: 5s
+        parallelism: 1
+        failure_action: rollback
+      placement:
+        constraints:
+          - node.role == worker
+    networks:
+      - network
+
+  rabbit:
+    image: rabbitmq:3-management-alpine
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+    volumes:
+        - /swarm/volumes/rabbit_data:/var/lib/rabbitmq/
+    environment:
+        MONGO: ${MONGO}
+        MONGO_PORT: ${MONGO_PORT}
+        RMQ_HOST: ${RMQ_HOST}
+        RMQ_USERNAME: ${RMQ_USERNAME}
+        RMQ_PASSWORD: ${RMQ_PASSWORD}
+    ports:
+        - 5672:5672
+        - 15672:15672
+    networks:
+      - network
+
+networks:
+  network:

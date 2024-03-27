@@ -1,0 +1,6 @@
+---
+- name: Register Gitlab runner
+  shell: >
+    docker exec -it gitlab-runner gitlab-runner register --url "{{ gitlab_url }}" --non-interactive --locked=false --name DockerRunner --executor docker --docker-image alpine:latest --registration-token "{{ registration_token }}" --tag-list "linux,xenial,ubuntu,docker" --run-untagged --docker-privileged="true"
+  tags:
+    - register

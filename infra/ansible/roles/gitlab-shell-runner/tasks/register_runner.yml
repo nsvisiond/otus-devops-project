@@ -1,0 +1,6 @@
+---
+- name: Register Gitlab Shell runner
+  shell: |
+    gitlab-runner register --url "{{ gitlab_url }}" --non-interactive --locked=false --name ShellRunner --executor shell --registration-token "{{ registration_token }}" --tag-list "app-shell" --run-untagged
+  tags:
+    - register

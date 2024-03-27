@@ -1,0 +1,7 @@
+---
+- hosts: docker_swarm_cluster
+  become: true
+  roles:
+    - docker
+    - glusterfs
+    - swarm

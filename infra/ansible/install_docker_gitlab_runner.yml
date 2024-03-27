@@ -1,0 +1,8 @@
+---
+- hosts: docker_runner
+  become: true
+  roles:
+    - role: gitlab-docker-runner
+      vars:
+        registration_token: glrt-J_SyYP4SyX5c2uDP7Jy_
+        gitlab_url: http://gitlab.otus-project.nsvision.ru
